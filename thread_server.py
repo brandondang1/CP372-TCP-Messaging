@@ -17,7 +17,7 @@ def print_cache():
     message = ""
     for client in clients:
         message += f"Client: {client.client_num}, Socket: {client.client_socket}, Opened at: {client.open_time}, Closed at: {client.close_time}\n"
-        print(message)
+        #print(message)
         return message
 
 
@@ -29,7 +29,7 @@ if not os.path.exists(files_dir):
 # Create a socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind(('localhost', 12345))  # Bind to localhost on port 12345
-server_socket.listen(5)  # Allow up to 5 queued connections
+server_socket.listen(3)  # Allow up to 3 queued connections
 #.listen enables server to accept connections (# = clients)
 print("Server is listening...")
 
@@ -50,7 +50,7 @@ def handle_client(client_socket, address):
 
     while True:
         try:
-            message = client_socket.recv(1024).decode()
+            message = client_socket.recv(1024).decode('utf-8')
             if not message:
                 break
             
@@ -71,10 +71,12 @@ def broadcast(message, sender_socket):
 
         if client.client_socket == sender_socket:
             if message.lower() == 'status':
-                message = ""
-                for client in clients:
-                    listing = print_cache()
-                    client.client_socket.send(listing.encode('utf-8'))
+
+                #for client in clients:
+                message_cache = print_cache()
+                client.client_socket.send((message + " ACK\n" + message_cache).encode('utf-8'))
+
+
             elif message.lower() == "list":
                 file_list = os.listdir(files_dir)
                 client.client_socket.send("\n".join(file_list).encode('utf-8'))
@@ -87,7 +89,7 @@ def broadcast(message, sender_socket):
                 else:
                     client_socket.send(f"File '{filename}' not found".encode('utf-8'))
             else:
-                client.client_socket.send((message + " ACK").encode())
+                client.client_socket.send((message + " ACK").encode('utf-8'))
 
 
         elif client.client_socket != sender_socket:
@@ -95,7 +97,7 @@ def broadcast(message, sender_socket):
                 client.client_socket.send(message.encode())
             except:
                 client.close_time()
-                clients.remove(client)
+                #clients.remove(client)
                 print(f"After Removing: {clients}")
 
 while True:
@@ -103,11 +105,3 @@ while True:
     client_thread = threading.Thread(target=handle_client, args=(client_socket, addr))
     client_thread.start()
 
-def print_cache(clients):
-    for client in clients:
-        print(client.index)
-        print(client.index)
-        print(client.index)
-        print(client.index)
-
-    print("Hello World")
