@@ -1,18 +1,30 @@
 import socket
 import threading
 import datetime
+import os 
 
 class new_Client:
-    def __init__(self, client_num, socket, open_time, close_time):
+    def __init__(self, client_num, socket, open_time):
         self.client_num = client_num
         self.client_socket = socket
         self.open_time = open_time 
-        self.close_time = close_time
+        self.close_time = None
 
     def set_close_time(self,close_time):
         self._close_time = close_time
 
+def print_cache():
+    message = ""
+    for client in clients:
+        message += f"Client: {client.client_num}, Socket: {client.client_socket}, Opened at: {client.open_time}, Closed at: {client.close_time}\n"
+        print(message)
+        return message
+
+
 index = 1
+files_dir = "server_files"  # Directory where files are stored
+if not os.path.exists(files_dir):
+    os.makedirs(files_dir)
 
 # Create a socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,7 +37,7 @@ clients = []
 
 def handle_client(client_socket, address):
     global index 
-    client = new_Client(index, client_socket,datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),0)
+    client = new_Client(index, client_socket, datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
     index += 1
     clients.append(client)
 
@@ -58,10 +70,25 @@ def broadcast(message, sender_socket):
     for client in clients:
 
         if client.client_socket == sender_socket:
-            client.client_socket.send((message + " ACK").encode())
-
             if message.lower() == 'status':
-                print("Listings:")
+                message = ""
+                for client in clients:
+                    listing = print_cache()
+                    client.client_socket.send(listing.encode('utf-8'))
+            elif message.lower() == "list":
+                file_list = os.listdir(files_dir)
+                client.client_socket.send("\n".join(file_list).encode('utf-8'))
+            elif message.startswith("get "):
+                filename = message.split(" ")[1]
+                filepath = os.path.join(files_dir, filename)
+                if os.path.exists(filepath):
+                    with open(filepath, "rb") as file:
+                        client.client_socket.send(file.read())
+                else:
+                    client_socket.send(f"File '{filename}' not found".encode('utf-8'))
+            else:
+                client.client_socket.send((message + " ACK").encode())
+
 
         elif client.client_socket != sender_socket:
             try:
