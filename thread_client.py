@@ -7,7 +7,7 @@ client_socket.connect(('localhost', 12345))  # Connect to the server
 def receive_messages():
     while True:
         try:
-            message = client_socket.recv(1024).decode()
+            message = client_socket.recv(1024).decode('utf-8')
             if not message:
                 break
             print(f"Received from server:{message}")
@@ -26,4 +26,4 @@ while True:
     if message.lower() == 'exit':
         client_socket.close()
         break
-    client_socket.send(message.encode())
+    client_socket.send(message.encode('utf-8'))
