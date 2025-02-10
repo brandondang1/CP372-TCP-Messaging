@@ -5,12 +5,14 @@ import datetime
 class new_Client:
     def __init__(self, client_num, socket, open_time, close_time):
         self.client_num = client_num
-        self.client_socket = client_socket
+        self.client_socket = socket
         self.open_time = open_time 
         self.close_time = close_time
 
     def set_close_time(self,close_time):
         self._close_time = close_time
+
+index = 1
 
 # Create a socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,12 +24,13 @@ print("Server is listening...")
 clients = []
 
 def handle_client(client_socket, address):
-    
-    index= 1
+    global index 
     client = new_Client(index, client_socket,datetime.datetime.now().strftime('%Y-%m-%d %H:%M'),0)
+    index += 1
     clients.append(client)
 
-    print(clients)
+    print(f"Client: {client.client_num}, Socket: {client.client_socket}, Opened at: {client.open_time}")
+
 
     #index= clients.index(client_socket)
 
