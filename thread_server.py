@@ -8,10 +8,16 @@ Emails: dang6034@mylaurier.ca, gaox1875@mylaurier.ca
 Last edited: "2025-02-10"
 ------------------------------------------------------------------------
 """
-import socket
-import threading
-import datetime
-import os 
+import socket 
+import threading #allows multithreading for multiple processes (clients) to be handled on one timeline
+import datetime #formatting to record when socket is opened/closed
+import os #file handling
+
+#Global Variables
+MAX_CLIENTS = 3
+active_clients = 0
+index = 1
+clients = []
 
 class new_Client: # Client object
     def __init__(self, client_num, socket, open_time):
@@ -21,6 +27,7 @@ class new_Client: # Client object
         self.close_time = None
         self.name = None
 
+#SETTER METHODS
     def set_close_time(self, closed):
         self.close_time = closed
 
@@ -31,12 +38,10 @@ def print_cache():
     message = ""
     for client in clients:
         message += f"Client: {client.client_num}, Name: {client.name}, Socket: {client.client_socket}, Opened at: {client.open_time}, Closed at: {client.close_time}\n"
-    print(message)
+    #print(message)
     return message
 
-MAX_CLIENTS = 3
-active_clients = 0
-index = 1
+
 files_dir = "server_files"  # Directory where files are stored
 if not os.path.exists(files_dir):
     os.makedirs(files_dir)
@@ -47,8 +52,6 @@ server_socket.bind(('localhost', 12345))  # Bind to localhost on port 12345
 server_socket.listen(MAX_CLIENTS + 1) # Allows up to MAX_CLIENTS + 1
 #.listen enables server to accept connections (# = clients)
 print("Server is listening...")
-
-clients = []
 
 def handle_client(client_socket, address):
     global index, active_clients
@@ -86,30 +89,45 @@ def handle_client(client_socket, address):
     active_clients -= 1
 
 def broadcast(message, sender_socket, sender_name):
+
     for client in clients:
+
         if client.close_time is not None:
             pass
+
         elif client.client_socket == sender_socket:
+
+            client.client_socket.send((message + " ACK").encode('utf-8')) #acknowledge every command to client first
+
             if message.lower() == 'status':
+
                 listing = print_cache()
                 client.client_socket.send(listing.encode('utf-8'))
+
             elif message.lower() == "list": # gets the list of files in the repo
+
                 file_list = os.listdir(files_dir)
                 client.client_socket.send("\n".join(file_list).encode('utf-8'))
+
             elif message.startswith("get "): # returns the file contents of requested file
+
                 filename = message.split(" ")[1]
                 filepath = os.path.join(files_dir, filename)
+
                 if os.path.exists(filepath): # checks if the file exists
                     with open(filepath, "rb") as file:
                         client.client_socket.send(file.read())
+
                 else: 
                     client_socket.send(f"File '{filename}' not found".encode('utf-8'))
+
             elif message.lower() == 'exit':
+
                 return False
-            else:
-                client.client_socket.send((message + " ACK").encode('utf-8'))
-        elif client.client_socket != sender_socket and client.close_time is None:
+
+        elif client.client_socket != sender_socket and client.close_time is None: #Ensure socket is not closed with additional check before broadcasting
             client.client_socket.send(f"{sender_name}: {(message)}".encode('utf-8'))
+
     return True
 
 
