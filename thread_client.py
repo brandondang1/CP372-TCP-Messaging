@@ -23,7 +23,8 @@ threading.Thread(target=receive_messages, daemon=True).start()
 # Send messages to the server
 while True:
     message = input()
+    client_socket.send(message.encode('utf-8'))
     if message.lower() == 'exit':
         client_socket.close()
         break
-    client_socket.send(message.encode('utf-8'))
+    
