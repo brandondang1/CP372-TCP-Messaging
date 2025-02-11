@@ -38,7 +38,7 @@ def print_cache():
     message = ""
     for client in clients:
         message += f"Client: {client.client_num}, Name: {client.name}, Socket: {client.client_socket}, Opened at: {client.open_time}, Closed at: {client.close_time}\n"
-    #print(message)
+    #print(message) # debug print statement
     return message
 
 
@@ -60,42 +60,34 @@ def handle_client(client_socket, address):
     index += 1
     clients.append(client)
     active = True 
-    print(f"Client: {client.client_num}, Socket: {client.client_socket}, Opened at: {client.open_time}")
-
-
-    #index= clients.index(client_socket)
 
     print(f"New connection from {address}; Client {client.client_num}")
+
     client_socket.send("Please enter a name: ".encode('utf-8'))
     
     while active:
-        message = client_socket.recv(1024).decode('utf-8') # recieves messages from the client
-        if not message:
-            break
-        
-        #"Recieved from {addresss}"
-        print(f"Received from Client {client.client_num}: {message}")
-        if message_count > 0:
-            active = broadcast(message, client_socket, client.name)
-        else:
-            client.set_name(message)
-            client_socket.send(f"Your name is set as: {client.name}".encode('utf-8'))
-        message_count += 1
+        try:
+            message = client_socket.recv(1024).decode('utf-8') # recieves messages from the client
+            
+            print(f"Received from Client {client.client_num}: {message}")
+            if message_count > 0:
+                active = broadcast(message, client_socket, client.name)
+            else:
+                client.set_name(message)
+                client_socket.send(f"Your name is set as: {client.name}".encode('utf-8'))
+            message_count += 1
+        except:
+            active = False # only occurs if the client is somehow disconnected without sending an exit command
     
-    print(f"Connection closed: {address}")
+    print(f"Connection closed: {address}") # formally close the socket server-side
     client.set_close_time(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
-    #clients.remove(client)
     client_socket.close()
     active_clients -= 1
 
 def broadcast(message, sender_socket, sender_name):
 
     for client in clients:
-
-        if client.close_time is not None:
-            pass
-
-        elif client.client_socket == sender_socket:
+        if client.client_socket == sender_socket:
 
             if message.lower() =='exit':
                 return False

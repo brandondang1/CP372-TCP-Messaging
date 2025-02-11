@@ -11,7 +11,6 @@ def receive_messages():
             if not message:
                 break
             print(f"Received from server: {message}")
-            #print(f"\n{message}")
         except:
             print("Disconnected from server.")
             client_socket.close()
@@ -25,6 +24,6 @@ while True:
     message = input()
     client_socket.send(message.encode('utf-8'))
     if message.lower() == 'exit':
-        client_socket.close()
+        client_socket.close() # formally closes the socket client-side
         break
     
