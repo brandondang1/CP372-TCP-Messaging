@@ -10,7 +10,7 @@ def receive_messages():
             message = client_socket.recv(1024).decode('utf-8')
             if not message:
                 break
-            print(f"Received from server:{message}")
+            print(f"Received from server: {message}")
             #print(f"\n{message}")
         except:
             print("Disconnected from server.")

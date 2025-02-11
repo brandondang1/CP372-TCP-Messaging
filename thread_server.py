@@ -15,10 +15,11 @@ class new_Client:
 
 def print_cache():
     message = ""
+
     for client in clients:
         message += f"Client: {client.client_num}, Socket: {client.client_socket}, Opened at: {client.open_time}, Closed at: {client.close_time}\n"
-        #print(message)
-        return message
+    
+    return message
 
 
 index = 1
@@ -62,8 +63,7 @@ def handle_client(client_socket, address):
             break
     
     print(f"Connection closed: {address}")
-    client.set_close_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
-    clients.remove(client)
+    client.set_close_time(datetime.datetime.now().strftime('%Y-%m-%d %H:%M')) 
     client_socket.close()
 
 def broadcast(message, sender_socket):
@@ -72,7 +72,6 @@ def broadcast(message, sender_socket):
         if client.client_socket == sender_socket:
             if message.lower() == 'status':
 
-                #for client in clients:
                 message_cache = print_cache()
                 client.client_socket.send((message + " ACK\n" + message_cache).encode('utf-8'))
 
@@ -93,12 +92,10 @@ def broadcast(message, sender_socket):
 
 
         elif client.client_socket != sender_socket:
-            try:
-                client.client_socket.send(message.encode())
-            except:
-                client.close_time()
-                #clients.remove(client)
-                print(f"After Removing: {clients}")
+    
+            client.client_socket.send(f"Client {client.client_num}: {message}".encode('utf-8'))
+  
+
 
 while True:
     client_socket, addr = server_socket.accept()
