@@ -1,6 +1,6 @@
 """
 ------------------------------------------------------------------------
-CP372 Programming Assignment
+CP372 Programming Assignment - Server.py
 ------------------------------------------------------------------------
 Authors: Brandon Dang, Daniel Gao
 IDs: 169026034, 169041875

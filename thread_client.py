@@ -1,3 +1,13 @@
+"""
+------------------------------------------------------------------------
+CP372 Programming Assignment - Client.py
+------------------------------------------------------------------------
+Authors: Brandon Dang, Daniel Gao
+IDs: 169026034, 169041875
+Emails: dang6034@mylaurier.ca, gaox1875@mylaurier.ca
+Last edited: "2025-02-10"
+------------------------------------------------------------------------
+"""
 import socket
 import threading
 
