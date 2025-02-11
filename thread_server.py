@@ -97,6 +97,9 @@ def broadcast(message, sender_socket, sender_name):
 
         elif client.client_socket == sender_socket:
 
+            if message.lower() =='exit':
+                return False
+
             client.client_socket.send((message + " ACK").encode('utf-8')) #acknowledge every command to client first
 
             if message.lower() == 'status':
@@ -121,9 +124,6 @@ def broadcast(message, sender_socket, sender_name):
                 else: 
                     client_socket.send(f"File '{filename}' not found".encode('utf-8'))
 
-            elif message.lower() == 'exit':
-
-                return False
 
         elif client.client_socket != sender_socket and client.close_time is None: #Ensure socket is not closed with additional check before broadcasting
             client.client_socket.send(f"{sender_name}: {(message)}".encode('utf-8'))
